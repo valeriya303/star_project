@@ -1,0 +1,45 @@
+# Розгортання за діаграмою: SPA (nginx) → сервер застосунку (FastAPI) → PostgreSQL + MinIO
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: star
+      POSTGRES_USER: star
+      POSTGRES_PASSWORD: star-db-password
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U star"]
+      interval: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes: [minio:/data]
+    ports: ["9001:9001"]
+
+  backend:
+    build: ./backend
+    depends_on:
+      db: { condition: service_healthy }
+      minio: { condition: service_started }
+    environment:
+      DATABASE_URL: postgresql+psycopg://star:star-db-password@db:5432/star
+      STORAGE_BACKEND: s3
+      S3_ENDPOINT: http://minio:9000
+      JWT_SECRET: change-me-in-production-please-32chars
+      FILE_URL_SECRET: change-me-too
+      AUTO_IMPORT_CSV: /app/data/hipparcos-voidmain.csv
+      CORS_ORIGINS: http://localhost:8080
+
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["8080:80"]
+
+volumes:
+  pgdata:
+  minio:

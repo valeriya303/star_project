@@ -1,0 +1,47 @@
+.picker {
+  position: relative;
+}
+
+.picker__list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: var(--space-1);
+  list-style: none;
+  max-height: 18rem;
+  overflow: auto;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-panel);
+}
+
+.picker__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font-size: var(--fs-sm);
+}
+
+.picker__item:hover,
+.picker__item--active {
+  background: var(--color-surface-hover);
+}
+
+/* «знайдено як Polarstern · німецька» */
+.match-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-teal);
+  font-size: var(--fs-xs);
+}

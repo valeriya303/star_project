@@ -1,0 +1,61 @@
+.sky {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sky__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.sky__canvas {
+  touch-action: none;
+}
+
+.sky__canvas--drag {
+  cursor: grab;
+}
+
+.sky__canvas--drag:active {
+  cursor: grabbing;
+}
+
+.sky__zoom {
+  position: absolute;
+  bottom: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.sky__zoom button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-lg);
+  line-height: 1;
+}
+
+.sky__zoom button:hover {
+  background: var(--color-surface-hover);
+}
+
+.sky__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+  text-align: center;
+  color: var(--color-menu-text);
+  pointer-events: none;
+}

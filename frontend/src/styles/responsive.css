@@ -1,0 +1,139 @@
+/* Загальна адаптивність. Сторінкові правила — у CSS відповідних сторінок */
+
+/* ===== Ноутбуки ===== */
+@media (max-width: 1280px) {
+  .layout__main {
+    padding: var(--space-5);
+  }
+  .header {
+    gap: var(--space-5);
+    padding: var(--space-3) var(--space-5);
+  }
+  .header__nav {
+    gap: var(--space-4);
+  }
+  .admin__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Планшети ===== */
+@media (max-width: 900px) {
+  .header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+  .header__logo .logo__text {
+    font-size: 1.5rem;
+  }
+  .header__nav {
+    order: 3;
+    flex: none;
+    flex-wrap: nowrap;
+    width: calc(100% + 2 * var(--space-4));
+    margin: 0 calc(var(--space-4) * -1);
+    padding: var(--space-1) var(--space-4) var(--space-2);
+    gap: var(--space-5);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .header__nav::-webkit-scrollbar {
+    display: none;
+  }
+  .header__link {
+    white-space: nowrap;
+  }
+  .header__profile,
+  .header__auth {
+    margin-left: auto;
+  }
+
+  .layout__main {
+    padding: var(--space-4);
+  }
+  .layout__footer {
+    padding: var(--space-4);
+    gap: var(--space-3) var(--space-5);
+  }
+
+  .lists,
+  .journal,
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+  .gallery {
+    grid-template-areas:
+      "level"
+      "add"
+      "photos";
+    grid-template-rows: auto;
+  }
+  .profile__layout {
+    grid-template-columns: 1fr;
+  }
+  .lists__add {
+    grid-template-columns: 1fr;
+  }
+  .modal__body {
+    padding: var(--space-5) var(--space-4);
+  }
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ===== Телефони ===== */
+@media (max-width: 600px) {
+  /* 16px у полях не дає iOS наближати сторінку при фокусі */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  .header__who {
+    display: none;
+  }
+  .header__auth .btn {
+    padding: var(--space-2) var(--space-3);
+  }
+  .tabs {
+    gap: var(--space-2);
+  }
+  .tabs__item {
+    padding: var(--space-1) var(--space-4);
+  }
+  .gallery__grid {
+    grid-template-columns: 1fr;
+  }
+  .profile__stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .search__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .filters__check,
+  .checkbox {
+    line-height: 1.4;
+  }
+}
+
+/* ===== Сенсорні екрани: зручні цілі для пальця ===== */
+@media (pointer: coarse) {
+  .btn,
+  .tabs__item,
+  .suggest,
+  .lists__item,
+  .segmented button {
+    min-height: 44px;
+  }
+  .class-dot {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .sky__zoom button {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}

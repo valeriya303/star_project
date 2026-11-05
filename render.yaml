@@ -1,0 +1,36 @@
+# Render Blueprint: New → Blueprint → вибрати цей репозиторій. Створює БД PostgreSQL і вебсервіс.
+databases:
+  - name: star-db
+    plan: free
+    databaseName: star
+    user: star
+
+services:
+  - type: web
+    name: star
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: star-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FILE_URL_SECRET
+        generateValue: true
+      - key: STORAGE_BACKEND
+        value: db
+      # Демо-дані для захисту (тестові акаунти, знімки, журнали). Для «чистого» сайту — 0
+      - key: SEED_DEMO
+        value: "1"
+      - key: SEED_DEMO_USERS
+        value: "1"
+      # Пароль тестових акаунтів (observer@, moderator@, admin@star.test…). Render попросить ввести його під час створення.
+      # Не використовуйте Star-demo-2026 в інтернеті: з ним будь-хто зайде як адміністратор.
+      - key: DEMO_PASSWORD
+        sync: false

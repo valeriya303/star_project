@@ -1,0 +1,241 @@
+.map-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.map-page .map-page__proj {
+  width: 12.5rem;
+}
+
+.map-page__body {
+  display: grid;
+  grid-template-columns: clamp(260px, 20vw, 320px) minmax(0, 1fr) clamp(280px, 22vw, 360px);
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-4);
+  height: clamp(560px, calc(100vh - 17rem), 900px);
+}
+
+.map-page__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  overflow: auto;
+  min-width: 0;
+  border-radius: var(--radius-lg);
+}
+
+.map-page .map-page__switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.map-page .map-page__switch button {
+  min-height: 2.5rem;
+  font-weight: 500;
+}
+
+.map-page__center {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+}
+
+.map-page__canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  background: #1c1525;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.map-page__loading {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: var(--fs-xs);
+}
+
+.map-page__toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-1) var(--space-1);
+  font-size: var(--fs-sm);
+}
+
+.map-page__toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 2.25rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  border: var(--border-width) solid rgba(245, 245, 245, 0.16);
+  background: rgba(36, 28, 46, 0.5);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.map-page__toggles label:hover {
+  border-color: rgba(255, 237, 123, 0.5);
+}
+
+.map-page__toggles label:has(input:checked) {
+  border-color: rgba(255, 237, 123, 0.55);
+  background: rgba(255, 237, 123, 0.08);
+}
+
+.map-page__toggles label:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.map-page__toggles input {
+  accent-color: var(--color-accent);
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.map-page__toggles .spacer {
+  min-width: var(--space-2);
+}
+
+.map-page__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--fs-xs);
+  color: var(--color-menu-text);
+}
+
+@media (max-width: 1500px) {
+  .map-page__toggles .spacer {
+    display: none;
+  }
+  .map-page__legend {
+    flex-basis: 100%;
+    padding-top: var(--space-2);
+    border-top: var(--border-width) solid rgba(245, 245, 245, 0.08);
+  }
+}
+
+.map-page__legend-title {
+  color: var(--color-text);
+}
+
+.map-page__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.map-page__legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.map-page__legend .map-page__nocolor {
+  border: 1px dashed var(--color-menu-text);
+  background: transparent;
+}
+
+.chip-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: var(--color-text-on-accent);
+  font-size: var(--fs-sm);
+}
+
+/* Ноутбуки та планшети в горизонтальному положенні: картка зорі під картою */
+@media (max-width: 1280px) {
+  .map-page__body {
+    grid-template-columns: clamp(260px, 28vw, 320px) minmax(0, 1fr);
+    grid-template-rows: clamp(520px, calc(100vh - 17rem), 820px) auto;
+    height: auto;
+  }
+  .map-page__card {
+    grid-column: 1 / -1;
+    overflow: visible;
+  }
+  .map-page__card .star-card {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-3) var(--space-6);
+    align-items: start;
+  }
+  .map-page__card .star-card > h2,
+  .map-page__card .star-card > p.star-card__sub,
+  .map-page__card .star-card > .star-card__actions {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Планшети в портретному положенні й телефони: одна колонка */
+@media (max-width: 860px) {
+  .map-page__body {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+  }
+  .map-page__center { order: 1; }
+  .map-page__card { order: 2; }
+  .map-page__filters { order: 3; }
+  .map-page__side {
+    overflow: visible;
+  }
+  .map-page__canvas {
+    flex: none;
+    height: min(70vh, 560px);
+    min-height: 320px;
+  }
+  .map-page__card .star-card {
+    display: flex;
+  }
+}
+
+@media (max-width: 600px) {
+  .map-page__side {
+    padding: var(--space-4);
+  }
+  .map-page__canvas {
+    height: 62vh;
+  }
+  .map-page__toggles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .map-page__toggles label {
+    justify-content: flex-start;
+  }
+  .map-page__legend {
+    grid-column: 1 / -1;
+  }
+  .map-page .map-page__proj {
+    width: 100%;
+  }
+}

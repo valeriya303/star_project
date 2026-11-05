@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "constellation-image-metadata.schema.json",
+  "title": "Метадані знімка сузір'я",
+  "description": "Схема валідації метаданих знімка сузір'я, що передається користувачем.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "constellation": {
+      "type": "string",
+      "enum": [
+        "Andromeda",
+        "Antlia",
+        "Apus",
+        "Aquarius",
+        "Aquila",
+        "Ara",
+        "Aries",
+        "Auriga",
+        "Boötes",
+        "Caelum",
+        "Camelopardalis",
+        "Cancer",
+        "Canes Venatici",
+        "Canis Major",
+        "Canis Minor",
+        "Capricornus",
+        "Carina",
+        "Cassiopeia",
+        "Centaurus",
+        "Cepheus",
+        "Cetus",
+        "Chamaeleon",
+        "Circinus",
+        "Columba",
+        "Coma Berenices",
+        "Corona Australis",
+        "Corona Borealis",
+        "Corvus",
+        "Crater",
+        "Crux",
+        "Cygnus",
+        "Delphinus",
+        "Dorado",
+        "Draco",
+        "Equuleus",
+        "Eridanus",
+        "Fornax",
+        "Gemini",
+        "Grus",
+        "Hercules",
+        "Horologium",
+        "Hydra",
+        "Hydrus",
+        "Indus",
+        "Lacerta",
+        "Leo",
+        "Leo Minor",
+        "Lepus",
+        "Libra",
+        "Lupus",
+        "Lynx",
+        "Lyra",
+        "Mensa",
+        "Microscopium",
+        "Monoceros",
+        "Musca",
+        "Norma",
+        "Octans",
+        "Ophiuchus",
+        "Orion",
+        "Pavo",
+        "Pegasus",
+        "Perseus",
+        "Phoenix",
+        "Pictor",
+        "Pisces",
+        "Piscis Austrinus",
+        "Puppis",
+        "Pyxis",
+        "Reticulum",
+        "Sagitta",
+        "Sagittarius",
+        "Scorpius",
+        "Sculptor",
+        "Scutum",
+        "Serpens",
+        "Sextans",
+        "Taurus",
+        "Telescopium",
+        "Triangulum",
+        "Triangulum Australe",
+        "Tucana",
+        "Ursa Major",
+        "Ursa Minor",
+        "Vela",
+        "Virgo",
+        "Volans",
+        "Vulpecula"
+      ]
+    },
+    "date_taken": {
+      "type": "string",
+      "format": "date"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "license": {
+      "type": "string",
+      "enum": [
+        "CC0-1.0",
+        "CC-BY-4.0",
+        "CC-BY-SA-4.0"
+      ]
+    },
+    "file_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "file_format": {
+      "type": "string",
+      "enum": [
+        "image/jpeg",
+        "image/png"
+      ]
+    },
+    "file_size_bytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10485760
+    },
+    "width_px": {
+      "type": "integer",
+      "minimum": 800
+    },
+    "height_px": {
+      "type": "integer",
+      "minimum": 600
+    },
+    "rights_confirmed": {
+      "type": "boolean",
+      "const": true
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  },
+  "required": [
+    "title",
+    "constellation",
+    "date_taken",
+    "author",
+    "license",
+    "file_name",
+    "file_format",
+    "file_size_bytes",
+    "width_px",
+    "height_px",
+    "rights_confirmed"
+  ]
+}

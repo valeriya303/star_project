@@ -1,0 +1,32 @@
+.section {
+  border-top: var(--border-width) solid var(--color-border-soft);
+  padding-top: var(--space-3);
+}
+
+.section__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-weight: 600;
+  text-align: left;
+}
+
+.section__arrow {
+  transition: transform var(--transition);
+}
+
+.section__arrow--open {
+  transform: rotate(180deg);
+}
+
+.section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) 0 var(--space-2);
+}

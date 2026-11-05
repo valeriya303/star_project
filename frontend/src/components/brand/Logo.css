@@ -1,0 +1,18 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.logo__mark {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(255, 237, 123, 0.35));
+}
+
+.logo__text {
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

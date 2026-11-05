@@ -1,0 +1,4 @@
+star.db*
+storage/
+__pycache__/
+.pytest_cache/

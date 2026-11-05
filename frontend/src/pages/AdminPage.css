@@ -1,0 +1,60 @@
+@import "../components/star/StarCard.css";
+
+.admin__grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 440px) 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.admin__grid > * {
+  min-width: 0;
+}
+
+.admin__grid .field__input,
+.admin__filters .field__input {
+  height: 2.75rem;
+  font-size: var(--fs-sm);
+}
+
+.admin__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.admin__issues {
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.admin__audit td {
+  font-size: var(--fs-xs);
+}
+
+.admin__audit .mono {
+  max-width: 18rem;
+}
+
+.admin__pre {
+  max-height: 20rem;
+  overflow: auto;
+  padding: var(--space-3);
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  white-space: pre-wrap;
+}
+
+.admin__search {
+  max-width: 20rem;
+  height: 2.75rem;
+}
+
+.admin .admin__role,
+.admin__role {
+  width: 13rem;
+}
+
+.admin__kv dd {
+  font-weight: 500;
+}

@@ -1,0 +1,20 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.layout__main {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-5) var(--space-6);
+}
+
+.layout__footer {
+  border-top: var(--border-width) solid rgba(245, 245, 245, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  font-size: var(--fs-xs);
+}

@@ -1,0 +1,21 @@
+# залежності та збірка
+node_modules/
+frontend/dist/
+backend/static/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# локальні дані (не для репозиторію)
+backend/star.db*
+backend/storage/
+*.zip
+
+# середовище
+.env
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
