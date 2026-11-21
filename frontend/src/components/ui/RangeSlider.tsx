@@ -14,6 +14,11 @@ const f = (n: number) => n.toFixed(1).replace(".", ",").replace("-", "−");
 
 export default function RangeSlider({ label, min, max, step, value, onChange, error }: Props) {
   const [lo, hi] = value;
+  const span = max - min || 1;
+  const loPct = ((lo - min) / span) * 100;
+  const hiPct = ((hi - min) / span) * 100;
+  // коли повзунки зійшлися біля правого краю, лівий має бути зверху, інакше його не зрушити
+  const loOnTop = lo >= max - span * 0.1 && lo === hi;
 
   return (
     <div className="range">
@@ -24,9 +29,16 @@ export default function RangeSlider({ label, min, max, step, value, onChange, er
         </span>
       </div>
 
-      <div className="range__inputs">
+      <div className="range__track">
+        <div className="range__rail" aria-hidden="true" />
+        <div
+          className="range__fill"
+          aria-hidden="true"
+          style={{ left: `${loPct}%`, width: `${Math.max(hiPct - loPct, 0)}%` }}
+        />
         <input
           type="range"
+          className={"range__input range__input--lo" + (loOnTop ? " range__input--top" : "")}
           min={min}
           max={max}
           step={step}
@@ -36,6 +48,7 @@ export default function RangeSlider({ label, min, max, step, value, onChange, er
         />
         <input
           type="range"
+          className="range__input range__input--hi"
           min={min}
           max={max}
           step={step}

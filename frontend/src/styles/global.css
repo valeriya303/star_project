@@ -373,6 +373,7 @@ select.field__input {
   justify-content: center;
   padding: var(--space-4);
   background: var(--color-overlay);
+  overscroll-behavior: contain; /* прокрутка не передається сторінці під вікном */
 }
 .modal__body {
   width: 100%;
@@ -381,6 +382,8 @@ select.field__input {
   max-height: calc(100dvh - 2rem);
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: contain; /* доскролили до краю вікна — сторінка не рухається */
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { fileUrl } from "@/api/client";
 import { communityApi, journalApi, photosApi } from "@/api/endpoints";
@@ -25,11 +25,21 @@ const REASONS = [
 const LICENSE_SHORT: Record<string, string> = { "CC0-1.0": "CC0", "CC-BY-4.0": "CC BY", "CC-BY-SA-4.0": "CC BY-SA" };
 
 type Tab = "gallery" | "people" | "journals";
+type Toast = { text: string; tone: "ok" | "error" };
+
+/** Адреса допису: дозволяє відкрити його в новій вкладці */
+const photoHref = (id: string | number) => `/community?photo=${encodeURIComponent(String(id))}`;
+
+/** Адреса профілю спостерігача: дозволяє відкрити його в новій вкладці */
+const personHref = (id: string) => `/community?person=${encodeURIComponent(id)}`;
 
 /** Публічна галерея (схвалені знімки за згодою C-02) та публічні журнали (C-04) */
 export default function CommunityPage() {
   const { user, canUsePersonal } = useAuth();
   const { constellations } = useCatalog();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const photoParam = searchParams.get("photo");
+  const personParam = searchParams.get("person");
   const [tab, setTab] = useState<Tab>("gallery");
   const [photos, setPhotos] = useState<Photo[] | null>(null);
   const [all, setAll] = useState<Photo[]>([]);
@@ -38,23 +48,75 @@ export default function CommunityPage() {
   const [complain, setComplain] = useState<Photo | null>(null);
   const [reason, setReason] = useState("");
   const [comment, setComment] = useState("");
-  const [msg, setMsg] = useState("");
+  const [toast, setToast] = useState<Toast | null>(null);
   const [journals, setJournals] = useState<{ user_id: string; display_name: string; entries: number }[]>([]);
   const [journal, setJournal] = useState<{ id: string; display_name: string; entries: JournalEntry[] } | null>(null);
   const [jError, setJError] = useState("");
   const [personId, setPersonId] = useState<string | null>(null);
 
-  function showPerson(id: string) {
+  function openPhoto(p: Photo) {
+    setOpen(p);
+    setSearchParams({ photo: String(p.id) });
+  }
+
+  function closePhoto() {
     setOpen(null);
+    if (photoParam) setSearchParams({}, { replace: true });
+  }
+
+  /** Звичайний клік відкриває модальне вікно; клік із Ctrl/Cmd/Shift і середня кнопка лишаються браузеру */
+  function onPhotoLink(e: React.MouseEvent, p: Photo) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    openPhoto(p);
+  }
+
+  function showPerson(id: string) {
+    closePhoto();
     setTab("people");
     setPersonId(id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   }
+
+  /** Те саме для посилань на профіль: модифіковані кліки лишаються браузеру */
+  function onPersonLink(e: React.MouseEvent, id: string) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    showPerson(id);
+  }
+
+  // Сповіщення зникає само через кілька секунд
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 4500);
+    return () => window.clearTimeout(t);
+  }, [toast]);
 
   useEffect(() => {
     photosApi.gallery().then(setAll).catch(() => setAll([]));
     journalApi.publicList().then(setJournals).catch(() => setJournals([]));
   }, []);
+
+  // Відкриття допису за адресою ?photo=<id> (наприклад, у новій вкладці)
+  useEffect(() => {
+    if (!photoParam) return;
+    const found = all.find((p) => String(p.id) === photoParam);
+    /* eslint-disable react-hooks/set-state-in-effect -- відкриття допису за параметром адреси */
+    if (found) setOpen((cur) => (cur && String(cur.id) === photoParam ? cur : found));
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [photoParam, all]);
+
+  // Відкриття профілю за адресою ?person=<id> (наприклад, у новій вкладці); параметр одразу прибираємо
+  useEffect(() => {
+    if (!personParam) return;
+    /* eslint-disable react-hooks/set-state-in-effect -- відкриття профілю за параметром адреси */
+    setTab("people");
+    setPersonId(personParam);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    const next = new URLSearchParams(searchParams);
+    next.delete("person");
+    setSearchParams(next, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- реагуємо лише на появу параметра
+  }, [personParam]);
 
   useEffect(() => {
     let alive = true;
@@ -89,12 +151,12 @@ export default function CommunityPage() {
     if (!complain || !reason) return;
     try {
       const r = await photosApi.complain(complain.id, reason, comment);
-      setMsg(r.message);
+      setToast({ text: r.message, tone: "ok" });
       setComplain(null);
       setReason("");
       setComment("");
     } catch (e) {
-      setMsg(e instanceof Error ? e.message : "Помилка");
+      setToast({ text: e instanceof Error ? e.message : "Не вдалося надіслати скаргу", tone: "error" });
     }
   }
 
@@ -178,8 +240,6 @@ export default function CommunityPage() {
         </p>
       </div>
 
-      {msg && <p className="notice notice--ok small" role="status">{msg}</p>}
-
       {tab === "gallery" && (
         <>
           {photos === null && <p className="muted">Завантаження…</p>}
@@ -193,17 +253,21 @@ export default function CommunityPage() {
           <div className="community__grid">
             {photos?.map((p) => (
               <article key={p.id} className="shot">
-                <button type="button" className="shot__media" onClick={() => setOpen(p)} aria-label={`Відкрити знімок «${p.title}»`}>
+                <a href={photoHref(p.id)} className="shot__media" onClick={(e) => onPhotoLink(e, p)}
+                  aria-label={`Відкрити знімок «${p.title}»`}>
                   <img src={fileUrl(p.thumb_url)} alt={p.title} loading="lazy" />
                   <span className="shot__chip">{p.constellation_uk}</span>
                   <span className="shot__zoom"><Icon name="search" size={16} /></span>
-                </button>
+                </a>
                 <div className="shot__body">
-                  <h3 className="shot__title">{p.title}</h3>
+                  <h3 className="shot__title">
+                    <a href={photoHref(p.id)} className="shot__title-link" onClick={(e) => onPhotoLink(e, p)}>{p.title}</a>
+                  </h3>
                   <p className="shot__meta">
                     {p.author_profile_id ? (
-                      <button type="button" className="author-link" onClick={() => showPerson(p.author_profile_id!)}
-                        title="Профіль спостерігача">{p.author}</button>
+                      <a href={personHref(p.author_profile_id)} className="author-link"
+                        onClick={(e) => onPersonLink(e, p.author_profile_id!)}
+                        title="Профіль спостерігача">{p.author}</a>
                     ) : <span>{p.author}</span>}
                     <span aria-hidden="true">·</span>
                     <span>{fmtDate(p.date_taken)}</span>
@@ -221,7 +285,7 @@ export default function CommunityPage() {
       )}
 
       {tab === "people" && (
-        <PeopleSection personId={personId} onPerson={setPersonId} onPhoto={setOpen} />
+        <PeopleSection personId={personId} onPerson={setPersonId} onPhoto={openPhoto} />
       )}
 
       {tab === "journals" && (
@@ -267,7 +331,7 @@ export default function CommunityPage() {
                       <span className="timeline__dot" aria-hidden="true" />
                       <div className="timeline__card">
                         <div className="timeline__row">
-                          <Link to="/map" state={{ hip: e.star_id }} className="timeline__star">{e.star_name ?? `HIP ${e.star_id}`}</Link>
+                          <Link to={`/map?star=${e.star_id}`} className="timeline__star">{e.star_name ?? `HIP ${e.star_id}`}</Link>
                           <time className="muted small">{fmtDate(e.observed_at)}</time>
                         </div>
                         <div className="timeline__ratings">
@@ -287,7 +351,7 @@ export default function CommunityPage() {
       )}
 
       {open && (
-        <Modal title={open.title} wide onClose={() => setOpen(null)}>
+        <Modal title={open.title} wide onClose={closePhoto}>
           <div className="viewer">
             <figure className="viewer__media">
               <img className="viewer__img" src={fileUrl(open.full_url)} alt={open.title} />
@@ -300,9 +364,10 @@ export default function CommunityPage() {
                   <dt>Автор</dt>
                   <dd>
                     {open.author_profile_id ? (
-                      <button type="button" className="author-link" onClick={() => showPerson(open.author_profile_id!)}>
+                      <a href={personHref(open.author_profile_id)} className="author-link"
+                        onClick={(e) => onPersonLink(e, open.author_profile_id!)}>
                         {open.author} <Icon name="external" size={12} />
-                      </button>
+                      </a>
                     ) : open.author}
                   </dd>
                 </div>
@@ -318,7 +383,7 @@ export default function CommunityPage() {
                   <Icon name="external" size={15} /> Повний розмір
                 </a>
                 {user ? (
-                  <button type="button" className="btn btn--outline btn--sm viewer__report" onClick={() => { setComplain(open); setOpen(null); }}>
+                  <button type="button" className="btn btn--outline btn--sm viewer__report" onClick={() => { setComplain(open); closePhoto(); }}>
                     <Icon name="shield" size={15} /> Поскаржитися
                   </button>
                 ) : (
@@ -348,6 +413,16 @@ export default function CommunityPage() {
             <button type="button" className="btn btn--primary btn--sm" disabled={!reason} onClick={sendComplaint}>Надіслати</button>
           </div>
         </Modal>
+      )}
+
+      {toast && (
+        <div className={"community-toast community-toast--" + toast.tone} role="status" aria-live="polite">
+          <Icon name={toast.tone === "ok" ? "check" : "x"} size={16} />
+          <span>{toast.text}</span>
+          <button type="button" className="icon-btn" onClick={() => setToast(null)} aria-label="Закрити сповіщення">
+            <Icon name="x" size={14} />
+          </button>
+        </div>
       )}
     </div>
   );
@@ -420,6 +495,7 @@ function PeopleSection({ personId, onPerson, onPhoto }: {
   const [data, setData] = useState<{ total: number; items: PersonCard[] } | null>(null);
   const [profile, setProfile] = useState<PersonProfile | null>(null);
   const [error, setError] = useState("");
+  const personRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let alive = true;
@@ -443,10 +519,19 @@ function PeopleSection({ personId, onPerson, onPhoto }: {
     };
   }, [personId]);
 
+  // після завантаження профілю прокручуємо до нього й переводимо фокус на заголовок
+  useEffect(() => {
+    if (!personId || profile?.id !== personId) return;
+    const el = personRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.querySelector<HTMLElement>(".person__name")?.focus({ preventScroll: true });
+  }, [personId, profile]);
+
   if (personId) {
     const p = profile?.id === personId ? profile : null;
     return (
-      <section className="person">
+      <section className="person" ref={personRef}>
         <button type="button" className="person__back" onClick={() => onPerson(null)}>
           <Icon name="undo" size={15} /> Усі спостерігачі
         </button>
@@ -457,7 +542,7 @@ function PeopleSection({ personId, onPerson, onPhoto }: {
             <header className="panel person__head">
               <Avatar name={p.name} size="lg" />
               <div className="person__id">
-                <h2 className="person__name">{p.name}</h2>
+                <h2 className="person__name" tabIndex={-1}>{p.name}</h2>
                 {p.also_known_as.length > 0 && <p className="muted xsmall">Також підписує знімки: {p.also_known_as.join(", ")}</p>}
                 <div className="person__badges">
                   <span><Icon name="gallery" size={14} /> {p.public_photos} {plural(p.public_photos, "знімок", "знімки", "знімків")}</span>
@@ -508,7 +593,7 @@ function PeopleSection({ personId, onPerson, onPhoto }: {
                         <span className="timeline__dot" aria-hidden="true" />
                         <div className="timeline__card">
                           <div className="timeline__row">
-                            <Link to="/map" state={{ hip: e.star_id }} className="timeline__star">{e.star_name ?? `HIP ${e.star_id}`}</Link>
+                            <Link to={`/map?star=${e.star_id}`} className="timeline__star">{e.star_name ?? `HIP ${e.star_id}`}</Link>
                             <time className="muted small">{fmtDate(e.observed_at)}</time>
                           </div>
                           <div className="timeline__ratings">

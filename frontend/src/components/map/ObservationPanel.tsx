@@ -26,12 +26,14 @@ interface Props {
   applied: ObsParams;
   onApply: (p: ObsParams) => void;
   showDisclaimer: boolean;
+  /** Режим «Карта зір»: місце й час не впливають на карту, тому відповідні елементи заблоковані */
+  locked?: boolean;
   /** Перша група панелі: вибір вигляду карти та проєкції */
   viewControls?: ReactNode;
 }
 
 /** UC-07: параметри спостереження — місце (Львів / вручну / геолокація), дата, час і часовий пояс */
-export default function ObservationPanel({ applied, onApply, showDisclaimer, viewControls }: Props) {
+export default function ObservationPanel({ applied, onApply, showDisclaimer, locked = false, viewControls }: Props) {
   const { place, setManual, resetToLviv } = usePlace();
   const geo = useGeolocation();
   const tzList = useMemo(() => timezoneOptions(), []);
@@ -97,6 +99,8 @@ export default function ObservationPanel({ applied, onApply, showDisclaimer, vie
 
   const active = placeMode === "manual" ? "manual" : place.source;
   const errorText = [errors.lat, errors.lon, errors.time].filter(Boolean).join(". ");
+  const lockedCls = locked ? " obs__locked" : "";
+  const lockedHint = locked ? "Доступно в режимі «Небо над місцем»" : undefined;
 
   return (
     <section className="obs panel" aria-label="Параметри перегляду неба">
@@ -108,7 +112,7 @@ export default function ObservationPanel({ applied, onApply, showDisclaimer, vie
           </div>
         )}
 
-        <div className="obs__group">
+        <fieldset className={"obs__group" + lockedCls} disabled={locked} title={lockedHint}>
           <span className="obs__label"><Icon name="pin" size={14} /> Місце спостереження</span>
           <div className="obs__controls">
             <div className="segmented obs__seg" role="group" aria-label="Місце спостереження">
@@ -128,9 +132,9 @@ export default function ObservationPanel({ applied, onApply, showDisclaimer, vie
               </div>
             )}
           </div>
-        </div>
+        </fieldset>
 
-        <div className="obs__group obs__group--time">
+        <fieldset className={"obs__group obs__group--time" + lockedCls} disabled={locked} title={lockedHint}>
           <span className="obs__label"><Icon name="clock" size={14} /> Дата, час і <Term id="timezone">часовий пояс</Term></span>
           <div className="obs__controls">
             <input type="date" className="field__input obs__input obs__date" value={date} aria-label="Дата спостереження"
@@ -153,13 +157,19 @@ export default function ObservationPanel({ applied, onApply, showDisclaimer, vie
               </div>
             )}
           </div>
-        </div>
+        </fieldset>
 
-        <div className="obs__actions">
+        <fieldset className={"obs__actions" + lockedCls} disabled={locked} title={lockedHint}>
           <button type="button" className="btn btn--outline btn--sm" onClick={now} title="Поточний момент з автооновленням">Зараз</button>
           <button type="button" className="btn btn--primary btn--sm" onClick={() => show(false)}>Показати небо</button>
-        </div>
+        </fieldset>
       </div>
+
+      {locked && (
+        <p className="obs__hint">
+          «Карта зір» не залежить від місця й часу спостереження. Ці параметри доступні в режимі «Небо над місцем».
+        </p>
+      )}
 
       {errorText && <p className="obs__error" role="alert">{errorText}</p>}
       {geo.message && <p className="obs__error" role="status">{geo.message}</p>}

@@ -42,9 +42,9 @@ function statusOf(p: Photo): { key: Filter; label: string; icon: IconName; tone:
   return { key: "internal", label: "Приватний", icon: "lock", tone: "muted" };
 }
 
-const FLOW: { key: Exclude<Filter, "all" | "rejected">; title: string; text: ReactNode; icon: IconName }[] = [
+const FLOW: { key: Exclude<Filter, "all" | "rejected">; title: string; text: ReactNode; icon: IconName; hint?: boolean }[] = [
   { key: "internal", title: "Завантаження", text: "Знімок бачите лише ви", icon: "upload" },
-  { key: "submitted", title: "Подання й модерація", text: <>Ваша згода <Term id="consents">C-02</Term> і перевірка модератором</>, icon: "shield" },
+  { key: "submitted", title: "Подання й модерація", text: "Ваша згода C-02 і перевірка модератором", icon: "shield", hint: true },
   { key: "public", title: "Публікація", text: "Знімок у галереї спільноти, +50 балів", icon: "globe" },
 ];
 
@@ -73,6 +73,7 @@ export default function GalleryPage() {
   const [confirm, setConfirm] = useState<{ photo: Photo; kind: "delete" | "hide" } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<HTMLElement>(null);
+  const libraryRef = useRef<HTMLElement>(null);
 
   const ukName = useMemo(() => new Map(constellations.map((c) => [c.latin, c.name])), [constellations]);
   const conOptions = useMemo<SelectOption[]>(
@@ -135,6 +136,13 @@ export default function GalleryPage() {
   function startUpload() {
     uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     fileInput.current?.click();
+  }
+
+  /** Крок «Шлях знімка»: фільтрує бібліотеку і прокручує до неї; повторний тап знімає фільтр */
+  function pickStep(key: Filter) {
+    const next: Filter = filter === key ? "all" : key;
+    setFilter(next);
+    if (next !== "all") libraryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function handleSubmit() {
@@ -231,7 +239,7 @@ export default function GalleryPage() {
         {FLOW.map((s, i) => (
           <li key={s.key}>
             <button type="button" className={"flow-step" + (filter === s.key ? " flow-step--active" : "")}
-              onClick={() => setFilter(filter === s.key ? "all" : s.key)} aria-pressed={filter === s.key}>
+              onClick={() => pickStep(s.key)} aria-pressed={filter === s.key}>
               <span className="flow-step__num">{i + 1}</span>
               <span className="flow-step__icon"><Icon name={s.icon} size={18} /></span>
               <span className="flow-step__body">
@@ -240,6 +248,11 @@ export default function GalleryPage() {
               </span>
               <span className="flow-step__count" aria-label="кількість знімків">{counts[s.key]}</span>
             </button>
+            {s.hint && (
+              <p className="flow-step__hint">
+                <Term id="consents">Що таке згода C-02</Term>
+              </p>
+            )}
           </li>
         ))}
       </ol>
@@ -354,7 +367,7 @@ export default function GalleryPage() {
         </section>
 
         {/* ---------- Бібліотека ---------- */}
-        <section className="studio__library" aria-labelledby="library-title">
+        <section ref={libraryRef} className="studio__library" aria-labelledby="library-title">
           <div className="studio__toolbar">
             <h2 id="library-title" className="studio__h2">Бібліотека <span className="muted">· {counts.all}</span></h2>
             <div className="filter-chips" role="group" aria-label="Фільтр за станом">

@@ -172,11 +172,17 @@ export default function SkyMap(props: Props) {
     setView((v) => (v ? clampView(v, size.w, size.h) : startView(size.w, size.h, projection)));
   }, [size, projection]);
 
-  // AC2: зміна проєкції зберігає центр і масштаб
+  // AC2: зміна проєкції зберігає центр і масштаб (з обмеженням меж для рівнопроміжної)
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- синхронізація з вибраною проєкцією
-    setView((v) => (v ? { ...v, proj: projection } : v));
+    setView((v) => {
+      if (!v) return v;
+      const { w, h } = sizeRef.current;
+      const next = { ...v, proj: projection };
+      return w > 0 && h > 0 ? clampView(next, w, h) : next;
+    });
   }, [projection]);
+
 
   // UC-03 крок 9: центрування на вибраній зорі
   useEffect(() => {

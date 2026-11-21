@@ -39,6 +39,14 @@ function initialObs(): ObsParams {
   };
 }
 
+/** HIP із адреси ?star=<HIP> (посилання, відкрите в новій вкладці) */
+function starFromQuery(search: string): number | null {
+  const raw = new URLSearchParams(search).get("star");
+  if (raw == null || raw.trim() === "") return null;
+  const n = Number(raw);
+  return Number.isInteger(n) ? n : null;
+}
+
 export default function MapPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,7 +60,7 @@ export default function MapPage() {
   const [mode, setMode] = useState<SkyMode>("equatorial");
   const [projection, setProjection] = useState<Projection>("equirect");
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
-  const [selected, setSelected] = useState<number | null>(preset?.hip ?? null);
+  const [selected, setSelected] = useState<number | null>(preset?.hip ?? starFromQuery(location.search));
   const [selectedConst, setSelectedConst] = useState<Constellation | null>(null);
   const [focus, setFocus] = useState<{ ra: number; dec: number; nonce: number } | null>(null);
   const [obs, setObs] = useState<ObsParams>(initialObs);
@@ -115,6 +123,17 @@ export default function MapPage() {
     setSelectedConst(null);
   }
 
+  /** Застосовує фільтри; якщо вибрана зоря їм більше не відповідає, знімає виділення й ховає картку */
+  function applyFilters(next: Filters) {
+    setFilters(next);
+    if (selected == null) return;
+    const star = catalog.byHip.get(selected);
+    if (!star) return; // зорі немає в завантаженому каталозі: нічого перевіряти
+    const passes = filterStars([star], next).stars.length > 0;
+    const inList = !onlyList || onlyList.hips.includes(selected);
+    if (!passes || !inList) setSelected(null);
+  }
+
   function pickFromSearch(s: StarSummary) {
     selectStar(s.hip);
     setFocus({ ra: s.ra, dec: s.dec, nonce: Date.now() });
@@ -144,6 +163,7 @@ export default function MapPage() {
         applied={obs}
         onApply={setObs}
         showDisclaimer={mode === "local"}
+        locked={mode === "equatorial"}
         viewControls={
           <>
             <div className="segmented obs__seg" role="group" aria-label="Вигляд карти">
@@ -187,7 +207,7 @@ export default function MapPage() {
           {panel === "search" ? (
             <SearchPanel onPick={pickFromSearch} />
           ) : (
-            <FiltersPanel applied={filters} onApply={setFilters} found={visible.length} catalog={serverCount}
+            <FiltersPanel applied={filters} onApply={applyFilters} found={visible.length} catalog={serverCount}
               excludedNoDistance={excluded} />
           )}
         </aside>

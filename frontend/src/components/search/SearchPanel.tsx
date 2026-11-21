@@ -30,6 +30,7 @@ export default function SearchPanel({ onPick }: Props) {
   const [suggest, setSuggest] = useState<StarSummary[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
+  const [fastActive, setFastActive] = useState(false);
   const timer = useRef<number | undefined>(undefined);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -39,6 +40,7 @@ export default function SearchPanel({ onPick }: Props) {
     setResults(null);
     setErrors({});
     setSuggest([]);
+    setFastActive(false);
   }
 
   // F3: підказки під час введення назви
@@ -62,6 +64,7 @@ export default function SearchPanel({ onPick }: Props) {
     ev?.preventDefault();
     setErrors({});
     setSuggest([]);
+    setFastActive(false);
     const e: Record<string, string> = {};
     let call: (() => Promise<StarSummary[]>) | null = null;
     if (mode === "name") {
@@ -93,9 +96,15 @@ export default function SearchPanel({ onPick }: Props) {
   }
 
   async function fastStars() {
+    setErrors({});
+    setSuggest([]);
     setBusy(true);
     try {
       setResults((await starsApi.fast(25)).items);
+      setFastActive(true);
+    } catch (err) {
+      setFastActive(false);
+      setErrors({ _: err instanceof Error ? err.message : "Не вдалося завантажити швидкі зорі" });
     } finally {
       setBusy(false);
     }
@@ -171,7 +180,8 @@ export default function SearchPanel({ onPick }: Props) {
         )}
         <div className="search__actions">
           <button type="submit" className="btn btn--primary btn--sm" disabled={busy}>{busy ? "Пошук…" : "Знайти"}</button>
-          <button type="button" className="btn btn--outline btn--sm" onClick={fastStars} disabled={busy}
+          <button type="button" className={"btn btn--sm " + (fastActive ? "btn--primary" : "btn--outline")}
+            aria-pressed={fastActive} onClick={fastStars} disabled={busy}
             title="Зорі з найбільшим власним рухом">Швидкі зорі</button>
         </div>
         {errors._ && <p className="status-error small">{errors._}</p>}

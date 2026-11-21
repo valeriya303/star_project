@@ -2,6 +2,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+  min-width: 0;
+}
+
+.star-card__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .star-card__name {
@@ -27,8 +35,9 @@
 }
 
 .kv > div {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(8rem, 40%) 1fr;
+  align-items: baseline;
   gap: var(--space-3);
   padding: var(--space-2) 0;
   border-bottom: var(--border-width) solid var(--color-border-soft);
@@ -37,14 +46,12 @@
 
 .kv dt {
   color: var(--color-menu-text);
-  flex-shrink: 0;
-  max-width: 55%;
 }
 
 .kv dd {
   margin: 0;
   font-weight: 600;
-  text-align: right;
+  text-align: left;
   overflow-wrap: anywhere;
 }
 
@@ -61,11 +68,32 @@
 .star-card__actions {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--space-3);
   margin-top: var(--space-2);
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* усі елементи дій (кнопки й вибір списку) на всю ширину блоку */
+.star-card__actions > * {
+  align-self: stretch;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* якщо Select — обгортка з кнопкою всередині, кнопка теж на всю ширину */
+.star-card__actions > div > button {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
 }
 
 .star-card__actions .btn {
+  justify-content: center;
   font-size: var(--fs-md);
   padding: var(--space-3) var(--space-4);
 }

@@ -24,6 +24,11 @@ function ProfileView() {
   const location = useLocation();
   const initialTab = (location.state as { tab?: Tab } | null)?.tab ?? "profile";
   const [tab, setTab] = useState<Tab>(initialTab);
+  useEffect(() => {
+    const next = (location.state as { tab?: Tab } | null)?.tab;
+    if (next) setTab(next);
+  }, [location.state]);
+
 
   const tabs: { value: Tab; label: string }[] = [{ value: "profile", label: "Профіль" }];
   if (canUsePersonal) tabs.push({ value: "consents", label: "Мої згоди" }, { value: "rewards", label: "Винагороди" });

@@ -4,6 +4,8 @@
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
   border-radius: var(--radius-lg);
+  min-width: 0;
+  max-width: 100%;
 }
 
 .obs__groups {
@@ -11,6 +13,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: var(--space-4) var(--space-6);
+  min-width: 0;
 }
 
 .obs__group {
@@ -40,6 +43,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .obs .obs__seg button {
@@ -51,6 +55,7 @@
 .obs__coords {
   display: flex;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .obs .obs__coords .obs__input {
@@ -60,6 +65,8 @@
 .obs .obs__input {
   height: 2.5rem;
   width: auto;
+  min-width: 0;
+  box-sizing: border-box;
   font-size: var(--fs-sm);
   padding: 0 var(--space-3);
 }
@@ -96,6 +103,7 @@
 .obs__error {
   color: var(--color-danger);
   font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
 }
 
 .obs__info {
@@ -107,6 +115,11 @@
   color: var(--color-menu-text);
   font-size: var(--fs-xs);
   line-height: 1.5;
+}
+
+.obs__info > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .obs__dot {
@@ -137,35 +150,85 @@
     align-items: stretch;
     gap: var(--space-4);
   }
+  .obs__controls > * {
+    min-width: 0;
+  }
+
+  /* сегментовані кнопки: рівні колонки за кількістю кнопок, текст може переноситись */
   .obs .obs__seg {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     width: 100%;
   }
   .obs .obs__seg button {
     padding: 0 var(--space-2);
+    min-width: 0;
+    white-space: normal;
+    line-height: 1.2;
   }
-  .obs .obs__coords,
+
+  /* координати: два поля в одному рядку на всю ширину */
+  .obs .obs__coords {
+    flex: 1 1 100%;
+    width: 100%;
+  }
   .obs .obs__coords .obs__input {
-    flex: 1;
-    width: auto;
+    flex: 1 1 0;
+    width: 100%;
+    min-width: 0;
   }
+
   .obs__group--time .obs__controls {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
   .obs .obs__date,
-  .obs .obs__time,
-  .obs .obs__tz {
+  .obs .obs__time {
     width: 100%;
+    min-width: 0;
   }
   .obs .obs__tz,
   .obs .obs__fold {
     grid-column: 1 / -1;
     width: 100%;
+    min-width: 0;
   }
+
   .obs__actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .obs__actions .btn {
+    min-width: 0;
+    white-space: normal;
+  }
+}
+
+/* перемикач «Вигляд»: дві рівні кнопки по 50%, текст по центру */
+.obs .segmented.obs__seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+  max-width: 100%;
+}
+
+.obs .segmented.obs__seg button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex: none;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* на великих екранах перемикач не розтягується на всю ширину */
+@media (min-width: 601px) {
+  .obs .segmented.obs__seg {
+    width: auto;
+    grid-auto-columns: minmax(max-content, 1fr);
   }
 }

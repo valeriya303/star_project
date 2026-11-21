@@ -24,6 +24,12 @@
   margin-bottom: var(--space-1);
 }
 
+/* Scrollspy: пункт змісту для розділу, який зараз на екрані */
+.help__toc-link--active {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
 .help__main {
   display: flex;
   flex-direction: column;
@@ -326,5 +332,43 @@
   }
   .help__list {
     padding-right: var(--space-4);
+  }
+}
+
+/* Підсвітка блоку-інструкції, на який перейшли з тултипа */
+.help__guide {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.help__guide--flash {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 237, 123, 0.25);
+}
+
+.help__term {
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.help__term--flash {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(255, 237, 123, 0.25);
+}
+
+
+/* Підсвітка терміна, на який перейшли з тултипа */
+.help__term.help__term--flash,
+.help__guide.help__guide--flash {
+  animation: help-flash 2s ease-out;
+}
+
+@keyframes help-flash {
+  0%,
+  30% {
+    background-color: rgba(255, 237, 123, 0.35);
+    box-shadow: 0 0 0 3px rgba(255, 237, 123, 0.6);
+  }
+  100% {
+    background-color: transparent;
+    box-shadow: none;
   }
 }

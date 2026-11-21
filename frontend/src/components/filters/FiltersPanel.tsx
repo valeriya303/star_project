@@ -87,10 +87,13 @@ export default function FiltersPanel({ applied, onApply, found, catalog, exclude
       </div>
 
       <RangeInputs label={<Term id="ly">Відстань, св. р.</Term>} aria="Відстань, світлових років" a={draft.distMin} b={draft.distMax} error={errors.dist}
+        phA="від ≈ 4" phB="до ≈ 1000"
         onA={(v) => set("distMin", v)} onB={(v) => set("distMax", v)} />
       <RangeInputs label={<Term id="bv">Показник кольору B–V</Term>} aria="Показник кольору B–V" a={draft.bvMin} b={draft.bvMax} error={errors.bv}
+        phA="від ≈ −0,3" phB="до ≈ +2"
         onA={(v) => set("bvMin", v)} onB={(v) => set("bvMax", v)} />
       <RangeInputs label={<><Term id="pm">Власний рух</Term>, <Term id="mas">мс</Term>/рік</>} aria="Власний рух, мс на рік" a={draft.pmMin} b={draft.pmMax} error={errors.pm}
+        phA="від ≈ 0" phB="до ≈ 1000"
         onA={(v) => set("pmMin", v)} onB={(v) => set("pmMax", v)} />
 
       <label className="filters__check">
@@ -126,15 +129,18 @@ export default function FiltersPanel({ applied, onApply, found, catalog, exclude
   );
 }
 
-function RangeInputs(p: { label: React.ReactNode; aria: string; a: string; b: string; onA: (v: string) => void; onB: (v: string) => void; error?: string }) {
+function RangeInputs(p: {
+  label: React.ReactNode; aria: string; a: string; b: string; onA: (v: string) => void; onB: (v: string) => void;
+  error?: string; phA?: string; phB?: string;
+}) {
   return (
     <div className="field">
       <span className="field__label filters__label">{p.label}</span>
       <div className="field__row">
         <input className={"field__input filters__num" + (p.error ? " field__input--error" : "")} inputMode="decimal"
-          placeholder="від" value={p.a} onChange={(e) => p.onA(e.target.value)} aria-label={`${p.aria}: від`} />
+          placeholder={p.phA ?? "від"} value={p.a} onChange={(e) => p.onA(e.target.value)} aria-label={`${p.aria}: від`} />
         <input className={"field__input filters__num" + (p.error ? " field__input--error" : "")} inputMode="decimal"
-          placeholder="до" value={p.b} onChange={(e) => p.onB(e.target.value)} aria-label={`${p.aria}: до`} />
+          placeholder={p.phB ?? "до"} value={p.b} onChange={(e) => p.onB(e.target.value)} aria-label={`${p.aria}: до`} />
       </div>
       {p.error && <span className="field__error">{p.error}</span>}
     </div>

@@ -16,7 +16,7 @@ const RETENTION = [
 /** Політика конфіденційності (DG-3, DG-7, DG-8) */
 export default function PrivacyPage() {
   return (
-    <div className="stack" style={{ maxWidth: 900 }}>
+    <div className="stack" style={{ maxWidth: 900, margin: "0 auto", width: "100%" }}>
       <h1 className="page-title">Політика конфіденційності</h1>
       <p>
         Система обробляє персональні дані відповідно до Закону України «Про захист персональних даних»; принципи GDPR (законність,
@@ -47,10 +47,20 @@ export default function PrivacyPage() {
       <section className="panel box">
         <h2 className="box__title">Ваші права</h2>
         <ul className="small">
-          <li>Переглянути й виправити дані профілю — <Link to="/profile">Профіль</Link>.</li>
-          <li>Отримати копію своїх даних — «Профіль → Мої дані → Завантажити JSON».</li>
-          <li>Надати або відкликати кожну згоду окремо — «Профіль → Мої згоди». Відкликати так само просто, як надати.</li>
-          <li>Видалити обліковий запис з вибором: повне видалення або анонімізація матеріалів.</li>
+          <li>
+            Переглянути й виправити дані профілю — <Link to="/profile" state={{ tab: "profile" }}>Профіль</Link>.
+          </li>
+          <li>
+            Отримати копію своїх даних — <Link to="/profile" state={{ tab: "data" }}>Профіль → Мої дані</Link>, кнопка «Завантажити JSON».
+          </li>
+          <li>
+            Надати або відкликати кожну згоду окремо — <Link to="/profile" state={{ tab: "consents" }}>Профіль → Мої згоди</Link>.
+            Відкликати так само просто, як надати.
+          </li>
+          <li>
+            Видалити обліковий запис з вибором: повне видалення або анонімізація матеріалів —{" "}
+            <Link to="/profile" state={{ tab: "data" }}>Профіль → Мої дані</Link>.
+          </li>
           <li>Поскаржитися на опублікований знімок — у галереї «Спільнота».</li>
         </ul>
       </section>

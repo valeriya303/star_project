@@ -3,6 +3,8 @@
   border-bottom: 1px dotted currentColor;
   cursor: help;
   outline-offset: 2px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .term__mark {
@@ -21,10 +23,17 @@
   opacity: 0.65;
 }
 
-.term:hover .term__mark,
 .term:focus-visible .term__mark {
   opacity: 1;
   color: var(--color-accent);
+}
+
+/* підсвітка при наведенні лише там, де є справжня миша */
+@media (hover: hover) and (pointer: fine) {
+  .term:hover .term__mark {
+    opacity: 1;
+    color: var(--color-accent);
+  }
 }
 
 .term__tip {

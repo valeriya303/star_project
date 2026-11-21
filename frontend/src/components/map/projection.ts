@@ -81,8 +81,15 @@ export function horizonRadius(w: number, h: number) {
 export function clampView(v: EqView, w: number, h: number): EqView {
   const minS = baseScale(w, h);
   const scale = Math.min(minS * 60, Math.max(minS, v.scale));
-  return { ...v, scale, ra0: wrap360(v.ra0), dec0: Math.max(-90, Math.min(90, v.dec0)) };
+  let dec0 = Math.max(-90, Math.min(90, v.dec0));
+  if (v.proj === "equirect") {
+    // верх і низ неба не виходять за межі вікна: порожніх смуг немає
+    const limit = Math.max(0, 90 - h / (2 * scale));
+    dec0 = Math.max(-limit, Math.min(limit, dec0));
+  }
+  return { ...v, scale, ra0: wrap360(v.ra0), dec0 };
 }
+
 
 /** Масштабування з утриманням точки під курсором */
 export function zoomAt(v: EqView, w: number, h: number, factor: number, px: number, py: number): EqView {

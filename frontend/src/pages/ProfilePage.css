@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  min-width: 0;
 }
 
 .profile__title {
@@ -10,9 +11,10 @@
 
 .profile__layout {
   display: grid;
-  grid-template-columns: minmax(320px, 520px) 1fr;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
   gap: var(--space-5);
   align-items: start;
+  min-width: 0;
 }
 
 .profile__card {
@@ -21,12 +23,20 @@
   align-items: stretch;
   gap: var(--space-4);
   padding: var(--space-6);
+  min-width: 0;
 }
 
 .profile__avatar-row {
   display: flex;
   align-items: center;
   gap: var(--space-4);
+  min-width: 0;
+}
+
+/* блок з іменем і роллю поруч з аватаром: може стискатися, довгі слова переносяться */
+.profile__avatar-row > div:not(.avatar) {
+  min-width: 0;
+  flex: 1 1 0;
 }
 
 .profile__avatar-btns {
@@ -34,6 +44,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .avatar {
@@ -58,6 +69,8 @@
 .profile__name {
   font-size: var(--fs-xl);
   font-weight: 600;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .profile__label {
@@ -68,6 +81,7 @@
 .profile__value {
   font-size: var(--fs-md);
   overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .profile__btns {
@@ -79,12 +93,14 @@
 .profile__error {
   color: var(--color-danger);
   font-size: var(--fs-sm);
+  overflow-wrap: anywhere;
 }
 
 .profile__stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-4);
+  min-width: 0;
 }
 
 .profile__stat {
@@ -92,6 +108,11 @@
   flex-direction: column;
   gap: var(--space-1);
   padding: var(--space-5);
+  min-width: 0;
+}
+
+.profile__stat > span {
+  overflow-wrap: anywhere;
 }
 
 .profile__num {
@@ -102,6 +123,42 @@
 
 .consents {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: var(--space-4);
+}
+
+/* планшет і телефон: одна колонка */
+@media (max-width: 900px) {
+  .profile__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .profile__card {
+    padding: var(--space-4);
+  }
+  .profile__avatar-row {
+    gap: var(--space-3);
+  }
+  .avatar {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+  .profile__name {
+    font-size: var(--fs-lg);
+  }
+  .profile__stat {
+    padding: var(--space-4);
+  }
+  .profile__num {
+    font-size: var(--fs-xl);
+  }
+}
+
+/* дуже вузькі екрани: картки статистики в одну колонку */
+@media (max-width: 380px) {
+  .profile__stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

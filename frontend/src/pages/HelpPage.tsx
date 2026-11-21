@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { GUEST_FEATURES, MEMBER_FEATURES } from "@/components/auth/access";
@@ -8,6 +8,8 @@ import type { IconName } from "@/components/brand/Icon";
 import { GLOSSARY } from "@/content/glossary";
 import type { GlossaryEntry } from "@/content/glossary";
 import "./HelpPage.css";
+
+const FLASH_MS = 2000;
 
 const QUICK_START: { icon: IconName; title: string; text: string }[] = [
   { icon: "map", title: "Відкрийте карту", text: "Перетягуйте небо мишею або пальцем, наближайте колесом миші, жестом або кнопками +/−." },
@@ -120,21 +122,23 @@ const FAQ: { q: string; a: string }[] = [
 
 const GROUPS = ["Усі", ...Array.from(new Set(GLOSSARY.map((g) => g.group)))];
 
+/** Пункти бічного змісту: id має збігатися з id відповідної <section> */
+const TOC: { id: string; label: string }[] = [
+  { id: "start", label: "Швидкий старт" },
+  { id: "access", label: "Що доступно" },
+  { id: "guides", label: "Інструкції" },
+  { id: "glossary", label: "Глосарій термінів" },
+  { id: "faq", label: "Часті запитання" },
+];
+
 export default function HelpPage() {
-  const { hash } = useLocation();
+  const { hash, key } = useLocation();
   const [q, setQ] = useState("");
   const [group, setGroup] = useState("Усі");
-
-  useEffect(() => {
-    if (!hash) return;
-    const el = document.getElementById(hash.slice(1));
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      el.classList.add("help__term--flash");
-      const t = window.setTimeout(() => el.classList.remove("help__term--flash"), 1800);
-      return () => window.clearTimeout(t);
-    }
-  }, [hash]);
+  const [activeId, setActiveId] = useState<string>(TOC[0].id);
+  const [flashId, setFlashId] = useState<string | null>(null);
+  // Яку адресу з якорем уже обробили, щоб не скролити повторно при кожній зміні фільтра
+  const handledHash = useRef<string | null>(null);
 
   const terms = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -142,16 +146,106 @@ export default function HelpPage() {
       (!s || `${g.term} ${g.short} ${g.long}`.toLowerCase().includes(s)));
   }, [q, group]);
 
+  /* 1. Якщо ціль — термін, який зараз не видно через пошук/фільтр, скидаємо фільтри */
+  useEffect(() => {
+    const id = hash.slice(1);
+    if (!id || handledHash.current === key) return;
+    const isGlossaryEntry = GLOSSARY.some((g) => g.id === id);
+    if (isGlossaryEntry && !terms.some((t) => t.id === id)) {
+      setQ("");
+      setGroup("Усі");
+    }
+  }, [hash, key, terms]);
+
+  /* 2. Скрол до блоку, розгортання закритого <details> і підсвітка */
+  useEffect(() => {
+    const id = hash.slice(1);
+    if (!id || handledHash.current === key) return;
+
+    const el = document.getElementById(id);
+    if (!el) {
+      // Елемента ще немає (фільтр його ховає): чекаємо наступного рендера
+      if (GLOSSARY.some((g) => g.id === id)) return;
+      handledHash.current = key;
+      return;
+    }
+
+    handledHash.current = key;
+
+    const details = el.closest("details");
+    if (details) details.open = true;
+
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    setFlashId(id);
+  }, [hash, key, terms]);
+
+
+  /* 3. Знімаємо підсвітку через FLASH_MS */
+  useEffect(() => {
+    if (!flashId) return;
+    const t = window.setTimeout(() => setFlashId(null), FLASH_MS);
+    return () => window.clearTimeout(t);
+  }, [flashId]);
+
+  /* Scrollspy: підсвічуємо в змісті розділ, який зараз читає користувач */
+  useEffect(() => {
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      // Лінія «читання» трохи нижча за липку шапку (scroll-margin-top: 6rem у CSS)
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const offset = rem * 6 + 24;
+
+      let current = TOC[0].id;
+      for (const { id } of TOC) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= offset) current = id;
+      }
+
+      // Унизу сторінки підсвічуємо останній пункт, навіть якщо розділ короткий
+      const doc = document.documentElement;
+      const canScroll = doc.scrollHeight > window.innerHeight + 2;
+      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 2;
+      if (canScroll && atBottom) current = TOC[TOC.length - 1].id;
+
+      setActiveId(current);
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    // capture: true — ловимо прокрутку і вікна, і будь-якого контейнера-обгортки
+    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll, { capture: true });
+      window.removeEventListener("resize", onScroll);
+    };
+    // Перераховуємо, коли фільтр глосарію змінює висоту сторінки
+  }, [terms.length]);
+
   return (
     <div className="help">
       <aside className="help__toc">
         <nav aria-label="Зміст довідки">
           <p className="help__toc-title">Зміст</p>
-          <a href="#start">Швидкий старт</a>
-          <a href="#access">Що доступно</a>
-          <a href="#guides">Інструкції</a>
-          <a href="#glossary">Глосарій термінів</a>
-          <a href="#faq">Часті запитання</a>
+          {TOC.map((item) => {
+            const isActive = item.id === activeId;
+            return (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={"help__toc-link" + (isActive ? " help__toc-link--active" : "")}
+                aria-current={isActive ? "location" : undefined}
+              >
+                {item.label}
+              </a>
+            );
+          })}
         </nav>
       </aside>
 
@@ -204,7 +298,11 @@ export default function HelpPage() {
           <h2 className="help__h2">Інструкції</h2>
           <div className="help__guides">
             {GUIDES.map((g) => (
-              <details key={g.id} id={g.id} className="panel help__guide">
+              <details
+                key={g.id}
+                id={g.id}
+                className={"panel help__guide" + (flashId === g.id ? " help__guide--flash" : "")}
+              >
                 <summary>{g.title}</summary>
                 <ol className="help__list">
                   {g.steps.map((s) => <li key={s}>{s}</li>)}
@@ -230,7 +328,11 @@ export default function HelpPage() {
           {terms.length === 0 && <p className="muted">Нічого не знайдено.</p>}
           <dl className="help__terms">
             {terms.map((g: GlossaryEntry) => (
-              <div key={g.id} id={g.id} className="panel help__term">
+              <div
+                key={g.id}
+                id={g.id}
+                className={"panel help__term" + (flashId === g.id ? " help__term--flash" : "")}
+              >
                 <dt>
                   <span>{g.term}</span>
                   <span className="help__group">{g.group}</span>

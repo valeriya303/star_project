@@ -13,7 +13,7 @@ export default function AboutDataPage() {
   }, []);
 
   return (
-    <div className="stack" style={{ maxWidth: 960 }}>
+    <div className="stack" style={{ maxWidth: 960, margin: "0 auto", width: "100%" }}>
       <h1 className="page-title">Про дані</h1>
       <p>
         Каталог зір зберігається в системі локально (AD-02) і оновлюється лише через перевірений імпорт. Для кожного запису
